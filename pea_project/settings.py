@@ -72,7 +72,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_LOCATION = 'static'
 
-STATICFILES_FINDER = [
+STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     

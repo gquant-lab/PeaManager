@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import datetime as dt
 import pandas as pd
 import numpy as np
 import dash
@@ -13,6 +14,14 @@ from django_plotly_dash import DjangoDash
 from quotes.models import Portfolio, FinancialData, FinancialObject, Order
 
 from quotes.forms import OrderForm
+
+"""
+Other ideas:
+- display the portfolio constituent performance + performance attribution (default benchmark to cac)
+- display the price , dividend and total return of the portfolio
+- display cumulated dividend received (annual chart comparison, and details for every year, maybe pie chart)
+- correlation matrix
+"""
 
 
 """
@@ -37,6 +46,29 @@ AUTRE MENU
 class Colors:
     dark = "#212529"
     card_dark = "#2d2d2d"
+
+# Reusable card styles
+CARD_STYLE = {
+    "border-radius": "15px",
+    "background-color": "#2d2d2d",
+    "color": "darkgray",
+    "margin-top": "20px"
+}
+
+CARD_HEADER_STYLE = {
+    "background-color": "black",
+    "border": "none",
+    "font-size": "14px",
+    "text-transform": "uppercase",
+    "font-weight": "bold",
+    "color": "darkgray"
+}
+
+CARD_BODY_COMPACT_STYLE = {
+    "padding": "10px",
+    "font-size": "20px",
+    "font-weight": "bold"
+}
 
 def order_tab_layout():
     """
@@ -232,7 +264,7 @@ def performance_overview(id_portfolio):
 
 app = DjangoDash('Portfolio', 
                  add_bootstrap_links=True,
-                 external_stylesheets=["/static/assets/cards.css", dbc.themes.BOOTSTRAP])   # replaces dash.Dash
+                 external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div(children=
     [
@@ -247,21 +279,21 @@ app.layout = html.Div(children=
         dbc.Row([
             dbc.Col(
                 dbc.Card([
-                    dbc.CardHeader("Current Portfolio Value"), 
-                    dbc.CardBody(id="card-ptf-value")
-                ], class_name="card-darken"),
+                    dbc.CardHeader("Current Portfolio Value", style=CARD_HEADER_STYLE), 
+                    dbc.CardBody(id="card-ptf-value", style=CARD_BODY_COMPACT_STYLE)
+                ], style=CARD_STYLE),
             ),
             dbc.Col(
                 dbc.Card([
-                    dbc.CardHeader("+/- Values"),
-                    dbc.CardBody(id="card-ptf-pnl")
-                ], class_name="card-darken"),
+                    dbc.CardHeader("+/- Values", style=CARD_HEADER_STYLE),
+                    dbc.CardBody(id="card-ptf-pnl", style=CARD_BODY_COMPACT_STYLE)
+                ], style=CARD_STYLE),
             ),
             dbc.Col(
                 dbc.Card([
-                    dbc.CardHeader("Last Updated"),
-                    dbc.CardBody(id="card-last-updated")
-                ], class_name="card-darken"),
+                    dbc.CardHeader("Last Updated", style=CARD_HEADER_STYLE),
+                    dbc.CardBody(id="card-last-updated", style=CARD_BODY_COMPACT_STYLE)
+                ], style=CARD_STYLE),
             ),
         ], id="row-card-override"),
 
@@ -274,19 +306,18 @@ app.layout = html.Div(children=
                     #dbc.Tab(label="Constituent Analysis", tab_id="constituent"),
                 ], 
                 id="tabs", 
-                active_tab="overview", 
-                style={"border": "none", "align-items": "center", "text-transform": "uppercase", "font-size": "14px",
-                        "font-weight": "bold", "color": "darkgray"}
+                active_tab="overview"
                 ),
+                style=CARD_HEADER_STYLE
             ),
             dbc.CardBody(id="order_details")
             ], 
             id="card-tabs", 
-            style={"border-radius": "15px", "background-color": "#2d2d2d"}
+            style=CARD_STYLE
         ),        
                 
         dbc.Card([
-            dbc.CardHeader("Constituent Performance"),
+            dbc.CardHeader("Constituent Performance", style=CARD_HEADER_STYLE),
             dbc.CardBody(children=[
                     # Dates button (left) + DateRangePicker (right)
                     html.Div([
@@ -323,31 +354,17 @@ app.layout = html.Div(children=
             dcc.Graph(id='contrib-graph', style={"height": "350px", }),
             ],
         )],
-        # card style
-        style={"border-radius": "15px", 
-                   "background-color": "#2d2d2d",
-                   "color": "darkgray",
-                   "margin-top": "20px",
-                   "text-transform": "uppercase",
-                   "font-size": "14px",
-                   "font-weight": "bold"},
+        style=CARD_STYLE
         ),
 
 
         dbc.Card(children=[
-                dbc.CardHeader("Dividends"),
+                dbc.CardHeader("Dividends", style=CARD_HEADER_STYLE),
                 dbc.CardBody(
                     dcc.Graph(id="dividends", style={"height": "350px"})
                 ),
             ],
-            class_name="card-darken",
-            style={"border-radius": "15px", 
-                   "background-color": "#2d2d2d",
-                   "color": "darkgray",
-                   "margin-top": "20px",
-                   "text-transform": "uppercase",
-                   "font-size": "14px",
-                   "font-weight": "bold"},
+            style=CARD_STYLE
         ),
 
     ],
