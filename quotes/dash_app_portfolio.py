@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-import datetime as dt
+from datetime import date
 import pandas as pd
 import numpy as np
 import dash
@@ -203,7 +203,7 @@ def get_individual_returns(id_portfolio):
             dmc.DatePicker(
                 id="indiv-ret-end-date",
                 label="End Date",
-                maxDate=dt.datetime.now().date()
+                maxDate=date.today()
             ),
         ], 
     )
