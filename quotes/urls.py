@@ -1,5 +1,7 @@
 from django.urls import path, include
-from quotes import views, dash_app, dash_app_portfolio, dash_instrument_comparison
+from quotes import views, dash_instrument_comparison
+from quotes.dash_apps.home import app as dash_app
+from quotes.dash_apps.portfolio import app as dash_app_portfolio
 
 urlpatterns = [
 	path('', views.home, name="home"),
