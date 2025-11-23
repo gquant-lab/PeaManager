@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 
 from quotes.dash_apps.home.components import get_performance_table
-from pea_project.quotes.dash_apps.home.callbacks import register_callbacks
+from quotes.dash_apps.home.callbacks import register_callbacks
 
 
 ## import data (to be fixed with internal Django mechanics)
