@@ -68,6 +68,11 @@ def register_callbacks(app: dash.Dash):
         if not series_mode in ["Prices", "Returns"]:
             raise Exception("Series_mode parameter is not right: either prices or returns.")
         
+        # Ensure all portfolios have time series data loaded
+        for ptf in portfolios:
+            if ptf.ts_ret is None:
+                ptf.get_TS()
+        
         ts_mode = "ts_val" if series_mode == "Prices" else "ts_cumul_ret"
 
         # Get relevant series on the adequate time frame
