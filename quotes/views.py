@@ -80,6 +80,38 @@ def portfolio(request, pk):
 	return render(request, "portfolio.html", context)
 
 
+def portfolio_native(request, pk):
+	"""
+	For a given portfolio, provides the inventory and cumulative amount invested 
+	"""
+	import numpy as np
+	
+	ptf = Portfolio.objects.get(id=pk)
+	latest_date = FinancialData.get_price_most_recent_date()
+
+	inventory = ptf.get_inventory(latest_date)
+
+	if ptf.ts_val is None:
+		ptf.get_TS()
+
+	# Portfolio Value
+	ptf_value = ptf.ts_val[latest_date]
+	
+	# Portfolio PnL
+	pnl = ptf_value - np.dot(inventory.nbs, inventory.prus) 
+
+	# Send back a string to dash template in the context
+	context = {
+		'ptf_value': ptf_value,
+		'pnl': pnl,
+		'latest_date': latest_date,
+
+
+	}
+	return render(request, "portfolio_native.html", context)
+
+
+
 def instrument_comparison(request):
 	
     return render(request, "instrument_comparison.html", {})
