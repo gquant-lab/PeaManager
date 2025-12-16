@@ -12,6 +12,7 @@ from plotly.utils import PlotlyJSONEncoder
 
 from quotes.models import Portfolio, FinancialData
 from quotes.utils.chart_creation import create_portfolio_chart, get_portfolio_performance
+from quotes.utils.chart_portfolio_util import performance_overview
 
 
 
@@ -98,15 +99,17 @@ def portfolio_native(request, pk):
 	ptf_value = ptf.ts_val[latest_date]
 	
 	# Portfolio PnL
-	pnl = ptf_value - np.dot(inventory.nbs, inventory.prus) 
+	pnl = ptf_value - np.dot(inventory.nbs, inventory.prus)
+
+	# inventory table
+	inv_df = performance_overview(pk)
 
 	# Send back a string to dash template in the context
 	context = {
 		'ptf_value': ptf_value,
 		'pnl': pnl,
 		'latest_date': latest_date,
-
-
+		'inventory': inv_df,
 	}
 	return render(request, "portfolio_native.html", context)
 
