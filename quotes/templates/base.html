@@ -3,12 +3,25 @@
 <head>
 	{% load static %}
 	{% load plotly_dash %}
+	
 	<!-- HTMX for dynamic content loading -->
 	<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+	
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<!-- CSRF token for HTMX: Django requires CSRF tokens for POST requests, HTMX sends them via headers -->
+	<meta name="csrf-token" content="{{ csrf_token }}">
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			document.body.addEventListener('htmx:configRequest', function(event) {
+				event.detail.headers['X-CSRFToken'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+			});
+		});
+	</script>
+	
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-	    {% plotly_header %} 
+	{% plotly_header %} 
 	<title>PEA Manager</title>
 </head>
 <body>
