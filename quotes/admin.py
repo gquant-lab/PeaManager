@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.apps import apps
-from .models import AccountOwner, Portfolio, FinancialObject, Order, FinancialData
+from quotes.models import AccountOwner, Portfolio, FinancialObject, Order, FinancialData
 # Register your models here.
 
 admin.site.register(AccountOwner)

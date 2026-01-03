@@ -3,11 +3,10 @@ FinancialObject model - represents stocks, ETFs, indices, etc.
 """
 from typing import Iterable
 from django.db import models
-import yfinance as yf
 from datetime import date, datetime, time
-import warnings
-warnings.filterwarnings("error")
+import logging
 
+logger = logging.getLogger(__name__)
 
 class FinancialObject(models.Model):
     
@@ -41,58 +40,58 @@ class FinancialObject(models.Model):
         Updates time series
         """
         from .financial_data import FinancialData
+        from quotes.data_sources.manager import DataSourceManager
 
-        stock = yf.Ticker(self.ticker)
-        data = []
+        manager = DataSourceManager()
+        last_date = self.get_latest_available_nav()
 
-        if self.get_latest_available_nav() == None:
-            # Take everything from YF
-            
-            df = stock.history(period="max")
-            prices: Iterable[tuple, float] = df["Close"].items() #type: ignore
-            divs: Iterable[tuple, float] = df["Dividends"][df["Dividends"] != 0].items() #type: ignore
+        # Handle special case for specific ISIN
+        if self.isin == "LU1834983477" and last_date:
+            last_date = date(2022,1,19)
 
-            for i, price in prices:
-                new = FinancialData(id_object=self, date=i.date(), field="NAV", value=price, origin="Yahoo Finance")
-                data.append(new)
-            FinancialData.objects.bulk_create(data)
-            
-            data = []
-            for i, div in divs:
-                new = FinancialData(id_object=self, date=i.date(), field="Dividends", value=div, origin="Yahoo Finance")
-                data.append(new)
-            FinancialData.objects.bulk_create(data)
-
+        if last_date is None:
+            logger.info(f"Fetching historical data for {self.ticker}")
+            result = manager.fetch_historical_data(self.ticker)
         else:
-            last_date = self.get_latest_available_nav()
-            if self.isin == "LU1834983477":
-                  last_date = date(2022,1,19)
-            df = stock.history(start=datetime.combine(last_date, time.min),
-                               end=datetime.now())
+            logger.info(f"Fetching incremental data for {self.ticker} since {last_date}")
+            result = manager.fetch_incremental_data(self.ticker, last_date)
 
-            if df.shape[0] == 0:
-                # No data
-                print(f"No data for {self.ticker}!")
-                return 
-            
-            prices = list(df["Close"].items()) #type: ignore
-            divs = list(df["Dividends"][df["Dividends"] != 0].items()) #type: ignore
+        if not result:
+            logger.warning(f"No data fetched for {self.ticker}")
+            return
+        
+        # Save prices to database
+        price_data = []
+        for date_val, price_val in result.prices:
+            price_data.append(FinancialData(
+                id_object=self,
+                date=date_val,
+                field="NAV",
+                value=price_val,
+                origin=result.source_name.value
+            ))
 
-            for i,price in prices:
-                if i.date() == last_date:
-                    continue
-                new = FinancialData(id_object=self, date=i.date(), field="NAV", value=price, origin="Yahoo Finance")
-                data.append(new)
+        if price_data:
+            FinancialData.objects.bulk_create(price_data)
+            logger.info(f"Saved {len(price_data)} price records for {self.ticker}")
 
-            FinancialData.objects.bulk_create(data)
+        # Save dividends to database
+        div_data = []
+        for date_val, div_val in result.dividends:
+            div_data.append(
+                FinancialData(
+                    id_object=self,
+                    date=date_val,
+                    field="Dividends",
+                    value=div_val,
+                    origin=result.source_name.value
+                )
+            )
+        
+        if div_data:
+            FinancialData.objects.bulk_create(div_data)
+            logger.info(f"Saved {len(div_data)} dividends for {self.ticker}")
 
-            data = []
-            for i, div in divs:
-                if i.date() == last_date:
-                    continue
-                new = FinancialData(id_object=self, date=i.date(), field="Dividends", value=div, origin="Yahoo Finance")
-                data.append(new)
-            FinancialData.objects.bulk_create(data)
 
     def get_perf(self, start_date, end_date=datetime.today().date()):
         """
