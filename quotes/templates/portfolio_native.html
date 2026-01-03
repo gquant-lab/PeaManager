@@ -100,3 +100,50 @@
 </div>
 
 {% endblock %}
+
+{% block extra_js %}
+<!-- 
+    HTMX + Bootstrap Modal Integration Fix
+    
+    Problem: When HTMX swaps HTML content after form submission, Bootstrap modals don't 
+    automatically close because HTMX and Bootstrap don't communicate with each other.
+    This causes:
+    - Modal staying open after successful submission
+    - Page becoming unscrollable (body keeps overflow:hidden)
+    - Dark backdrop remaining on screen
+    
+    Solution: Listen to HTMX's afterSwap event and manually trigger Bootstrap's cleanup
+-->
+<script>
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        // Only proceed if the swapped element is our orders table
+        if (event.detail.target.id === 'orders-table') {
+            var modalElement = document.getElementById('addOrderModal');
+            if (modalElement) {
+                // Get existing Bootstrap modal instance or create new one
+                // (getInstance returns null if modal was opened before HTMX swap)
+                var modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                
+                // Close the modal using Bootstrap's API
+                modal.hide();
+                
+                // Clean up Bootstrap's side effects after modal close animation (300ms)
+                setTimeout(function() {
+                    // Remove the dark backdrop that Bootstrap creates
+                    var backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                    
+                    // Remove 'modal-open' class that Bootstrap adds to body
+                    document.body.classList.remove('modal-open');
+                    
+                    // Reset body styles that Bootstrap modifies to prevent scrolling
+                    document.body.style.overflow = '';        // Restore scrolling
+                    document.body.style.paddingRight = '';    // Remove scrollbar compensation
+                }, 300);
+            }
+        }
+    });
+</script>
+{% endblock %}
