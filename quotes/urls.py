@@ -9,4 +9,6 @@ urlpatterns = [
 	path("portfolio/<str:pk>/", views.portfolio, name="portfolio"),
     path("portfolio-native/<str:pk>/", views.portfolio_native, name="portfolio_native"),
     path("instrument-comparison", views.instrument_comparison, name="instrument_comparison"),
+    path('api/delete-order/<int:order_id>/', views.delete_order, name="delete_order"),
+    path('api/add-order/<str:pk>/', views.add_order, name="add_order"),
 ]

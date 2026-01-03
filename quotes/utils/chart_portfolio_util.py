@@ -45,6 +45,7 @@ def get_order_history(portfolio_id):
     l_dicts = []
     for order in orders:
         d = {
+            'id': order.id,
             'date': order.date,
             'id_object': order.id_object.name,
             'direction': order.direction,

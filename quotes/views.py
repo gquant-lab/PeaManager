@@ -10,7 +10,7 @@ import pandas as pd
 import json
 from plotly.utils import PlotlyJSONEncoder
 
-from quotes.models import Portfolio, FinancialData
+from quotes.models import Portfolio, FinancialData, Order, FinancialObject
 from quotes.utils.chart_creation import create_portfolio_chart, get_portfolio_performance
 from quotes.utils.chart_portfolio_util import performance_overview, get_order_history
 
@@ -106,6 +106,7 @@ def portfolio_native(request, pk):
 	
 	# order history
 	orders = get_order_history(pk)
+	financial_objects = FinancialObject.objects.all()
 
 	# Send back a string to dash template in the context
 	context = {
@@ -114,9 +115,61 @@ def portfolio_native(request, pk):
 		'latest_date': latest_date,
 		'inventory': inv_df,
 		'orders': orders,
+		'financial_objects': financial_objects,
+		'pk': pk,
 	}
 	return render(request, "portfolio_native.html", context)
 
+
+def delete_order(request, order_id):
+	"""
+	Delete an order and return the updated orders table.
+	"""
+	order = Order.objects.get(id=order_id)
+	portfolio_id = order.portfolio.id
+	financial_objects = FinancialObject.objects.all()
+
+	# Delete the order
+	order.delete()
+
+	# Get updated order history
+	orders = get_order_history(portfolio_id)
+
+	# Only return the updated table HTML
+	return render(request, "partials/orders_table.html", {'orders': orders, 'pk': portfolio_id, 'financial_objects': financial_objects})
+
+def add_order(request, pk):
+    """
+    Add a new order and return the updated orders table.
+    """
+    if request.method == 'POST':
+        # Get the portfolio
+        portfolio = Portfolio.objects.get(id=pk)
+        
+        # Get the financial object
+        financial_object = FinancialObject.objects.get(id=request.POST['id_object'])
+        
+        # Create the new order
+        Order.objects.create(
+            portfolio=portfolio,
+            id_object=financial_object,
+            date=request.POST['date'],
+            direction=request.POST['direction'],
+            nb_items=request.POST['nb_items'],
+            price=request.POST['price'],
+            total_fee=request.POST.get('total_fee', 0),
+        )
+        
+        # Get updated order list
+        orders = get_order_history(pk)
+        financial_objects = FinancialObject.objects.all()
+        
+        # Return the updated table HTML
+        return render(request, 'partials/orders_table.html', {
+            'orders': orders,
+            'pk': pk,
+            'financial_objects': financial_objects
+        })
 
 
 def instrument_comparison(request):
