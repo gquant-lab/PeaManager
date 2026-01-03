@@ -44,6 +44,17 @@
         </div>
     </div>
 
+    <!-- Portfolio Allocation Pie Chart -->
+    <div class="card bg-dark text-white mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Portfolio Allocation</h5>
+        </div>
+        <div class="card-body">
+            <div id="allocation-chart" style="height: 400px;"></div>
+        </div>
+    </div>
+
+
     <!-- Tabs Card -->
     <div class="card bg-dark text-white">
         <div class="card-header">
@@ -103,19 +114,25 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- 
-    HTMX + Bootstrap Modal Integration Fix
-    
-    Problem: When HTMX swaps HTML content after form submission, Bootstrap modals don't 
-    automatically close because HTMX and Bootstrap don't communicate with each other.
-    This causes:
-    - Modal staying open after successful submission
-    - Page becoming unscrollable (body keeps overflow:hidden)
-    - Dark backdrop remaining on screen
-    
-    Solution: Listen to HTMX's afterSwap event and manually trigger Bootstrap's cleanup
--->
+<!-- Load Plotly.js library for rendering interactive charts -->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
 <script>
+    // Portfolio Allocation Pie Chart
+    var allocationData = {{ allocation_chart|safe }};
+    Plotly.newPlot('allocation-chart', allocationData.data, allocationData.layout, {responsive: true});
+
+    // ==========================================
+    // HTMX + Bootstrap Modal Integration Fix
+    // ==========================================
+    // Problem: HTMX and Bootstrap don't communicate, causing modals to stay open after
+    // HTMX swaps content following form submission. This results in:
+    //   - Modal remaining visible
+    //   - Body locked (overflow:hidden, no scrolling)
+    //   - Dark backdrop persisting on screen
+    //
+    // Solution: Listen for HTMX's afterSwap event and manually close the modal
+    // using Bootstrap's API, then clean up all side effects
     document.body.addEventListener('htmx:afterSwap', function(event) {
         // Only proceed if the swapped element is our orders table
         if (event.detail.target.id === 'orders-table') {

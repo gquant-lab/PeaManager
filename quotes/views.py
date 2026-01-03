@@ -12,7 +12,7 @@ from plotly.utils import PlotlyJSONEncoder
 
 from quotes.models import Portfolio, FinancialData, Order, FinancialObject
 from quotes.utils.chart_creation import create_portfolio_chart, get_portfolio_performance
-from quotes.utils.chart_portfolio_util import performance_overview, get_order_history
+from quotes.utils.chart_portfolio_util import performance_overview, get_order_history, create_allocation_chart
 
 
 
@@ -101,6 +101,10 @@ def portfolio(request, pk):
 	# Portfolio PnL
 	pnl = ptf_value - np.dot(inventory.nbs, inventory.prus)
 
+	# Allocation chart
+	allocation_chart = create_allocation_chart(pk)
+	allocation_json = json.dumps(allocation_chart, cls=PlotlyJSONEncoder)
+
 	# inventory table
 	inv_df = performance_overview(pk)
 	
@@ -113,6 +117,7 @@ def portfolio(request, pk):
 		'ptf_value': ptf_value,
 		'pnl': pnl,
 		'latest_date': latest_date,
+		'allocation_chart': allocation_json,
 		'inventory': inv_df,
 		'orders': orders,
 		'financial_objects': financial_objects,

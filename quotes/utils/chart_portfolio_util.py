@@ -1,4 +1,5 @@
 import numpy as np
+import plotly.graph_objects as go
 
 from quotes.models import Portfolio, FinancialData, Order
 
@@ -55,3 +56,37 @@ def get_order_history(portfolio_id):
         }
         l_dicts.append(d)
     return l_dicts
+
+def create_allocation_chart(portfolio_id):
+    """
+    Create a pie chart showing the allocation of the portfolio.
+    """
+    ptf = Portfolio.objects.get(id=portfolio_id)
+    weights = ptf.get_weights()
+
+    # weights is already {name: percentage}
+    labels = list(weights.keys())
+    values = list(weights.values())
+
+    fig = go.Figure(data=[go.Pie(
+        labels=labels,
+        values=values,
+        textinfo='label',
+        textposition='inside',
+        insidetextorientation='radial',
+        hovertemplate='<b>%{label}</b><br>Weight: %{percent}<extra></extra>',
+        hole=0.3,
+        sort=True,  # Already sorted
+        direction='clockwise',
+    )])
+
+    fig.update_layout(
+        title=None, #card header has it
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        showlegend=False,
+        margin=dict(t=0, b=0, l=0, r=0)
+    )
+    
+    return fig
