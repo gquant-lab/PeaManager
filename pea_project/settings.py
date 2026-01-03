@@ -43,9 +43,6 @@ INSTALLED_APPS = [
     'quotes.apps.QuotesConfig',
     
     'bootstrap5',
-    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
-    'dpd_static_support',
-
 ]
 
 MIDDLEWARE = [
@@ -60,9 +57,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    'django_plotly_dash.middleware.ExternalRedirectionMiddleware',
-    'django_plotly_dash.middleware.BaseMiddleware',
 ]
 
 # The absolute path to the directory where collectstatic will collect static files for deployment
@@ -76,16 +70,6 @@ STATICFILES_LOCATION = 'static'
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    
-    'django_plotly_dash.finders.DashAssetFinder',
-    'django_plotly_dash.finders.DashComponentFinder',
-    'django_plotly_dash.finders.DashAppDirectoryFinder'
-]
-
-PLOTLY_COMPONENTS = [
-    'dpd_components',
-    'dpd_static_support',
-    'dash_bootstrap_components',
 ]
 
 ROOT_URLCONF = 'pea_project.urls'
@@ -166,5 +150,3 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 CRISPY_TEMPLATE_PACK = 'django_bootstrap5'
 
 ASGI_APPLICATION = 'pea_project.routing.application'
-
-#PLOTLY_DASH = {"serve_locally": True}

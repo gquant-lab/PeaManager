@@ -81,7 +81,7 @@ def portfolio(request, pk):
 	return render(request, "portfolio.html", context)
 
 
-def portfolio_native(request, pk):
+def portfolio(request, pk):
 	"""
 	For a given portfolio, provides the inventory and cumulative amount invested 
 	"""
@@ -118,7 +118,7 @@ def portfolio_native(request, pk):
 		'financial_objects': financial_objects,
 		'pk': pk,
 	}
-	return render(request, "portfolio_native.html", context)
+	return render(request, "portfolio.html", context)
 
 
 def delete_order(request, order_id):
