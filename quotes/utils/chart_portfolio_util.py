@@ -1,6 +1,6 @@
 import numpy as np
 
-from quotes.models import Portfolio, FinancialData
+from quotes.models import Portfolio, FinancialData, Order
 
 def performance_overview(id_portfolio):
     """
@@ -32,3 +32,25 @@ def performance_overview(id_portfolio):
     df[numeric_cols] = df[numeric_cols].map('{:,.2f}'.format)
 
     return df.to_dict(orient="records")
+
+
+def get_order_history(portfolio_id):
+    """
+    Get all orders for a portfolio.
+    Returns a list of dicts with order details.
+    """
+    portfolio = Portfolio.objects.get(id=portfolio_id)
+    orders = Order.objects.filter(portfolio=portfolio).order_by('-date')
+
+    l_dicts = []
+    for order in orders:
+        d = {
+            'date': order.date,
+            'id_object': order.id_object.name,
+            'direction': order.direction,
+            'nb_items': order.nb_items,
+            'price': order.price,
+            'total_fee': order.total_fee,
+        }
+        l_dicts.append(d)
+    return l_dicts
