@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',  # <-- Added comma
+    'django.contrib.humanize',
     
     'quotes.apps.QuotesConfig',
     
@@ -150,3 +150,31 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 CRISPY_TEMPLATE_PACK = 'django_bootstrap5'
 
 ASGI_APPLICATION = 'pea_project.routing.application'
+
+# Logging Configuration (Development)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {asctime} {name} - {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'quotes.data_sources': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Change to DEBUG for more detail
+        },
+        'quotes.models': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
