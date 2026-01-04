@@ -90,3 +90,66 @@ def create_allocation_chart(portfolio_id):
     )
     
     return fig
+
+def create_portfolio_performance_chart(portfolio_id, time_frame='max'):
+    """
+    Create a time series chart showing portfolio performance over time.
+    Single portfolio version - no legend needed.
+    
+    Args:
+        portfolio_id: Portfolio primary key
+        time_frame: '1m', '3m', '6m', 'ytd', '1y', '3y', 'max'
+    
+    Returns:
+        Plotly Figure
+    """
+    from quotes.utils.chart_creation import timeframe_to_limit_date
+    
+    ptf = Portfolio.objects.get(id=portfolio_id)
+    
+    # Ensure time series is loaded
+    if ptf.ts_cumul_ret is None:
+        ptf.get_TS()
+    
+    # Filter by timeframe
+    limit_date = timeframe_to_limit_date(time_frame)
+    ts = ptf.ts_cumul_ret[ptf.ts_cumul_ret.index >= limit_date]
+    
+    # Normalize to start at 0% for returns view
+    ts_normalized = (ts / ts.iloc[0]) - 1
+    
+    # Create trace (single line, no need for legend)
+    trace = go.Scatter(
+        x=list(ts.index),
+        y=list(ts_normalized.values),
+        line={'color': 'darkorange', 'width': 3},
+        hovertemplate='%{x|%d/%m/%Y}<br>Return: %{y:.2%}<extra></extra>'
+    )
+    
+    fig = go.Figure(data=[trace])
+    
+    # Styling (dark theme, no legend)
+    fig.update_layout(
+        yaxis={
+            'side': 'right',
+            'tickformat': '.0%',
+            'hoverformat': '.2%',
+            'gridwidth': 1,
+            'zerolinecolor': 'lightgray',
+            'tickfont': {'color': 'white', 'size': 14}
+        },
+        xaxis={
+            'dtick': 'M1',
+            'tickformat': '%b\n%Y',
+            'ticklabelmode': 'period',
+            'showgrid': False,
+            'tickfont': {'color': 'white'}
+        },
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        margin=dict(t=20, b=40, l=40, r=60),
+        hovermode='x unified'
+    )
+    
+    return fig

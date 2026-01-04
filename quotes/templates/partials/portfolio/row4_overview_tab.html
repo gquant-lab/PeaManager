@@ -1,0 +1,31 @@
+{% load humanize %}
+
+<!-- Overview Tab - Positions Table -->
+<div class="table-responsive">
+    <table class="table table-dark table-hover text-center">
+        <thead>
+            <tr>
+                <th>Instrument</th>
+                <th>Number</th>
+                <th>PRU</th>
+                <th>Amount Paid</th>
+                <th>Current Value</th>
+                <th>+/- Value</th>
+                <th>Weight</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in inventory %}
+            <tr>
+                <td>{{ item.Name }}</td>
+                <td>{{ item.Number }}</td>
+                <td>{{ item.PRU }}</td>
+                <td>{{ item.Amount_Paid }}</td>
+                <td>{{ item.Current_Value }}</td>
+                <td>{{ item.Pnl }}</td>
+                <td>{{ item.Weight }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

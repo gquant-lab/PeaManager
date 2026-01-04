@@ -1,0 +1,37 @@
+{% load humanize %}
+
+<!-- Row 1: Summary Cards (Portfolio Value | PnL | Last Updated) -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-dark text-white">
+            <div class="card-header">
+                <h5 class="mb-0">Current Portfolio Value</h5>
+            </div>
+            <div class="card-body">
+                <h3 class="mb-0">{{ ptf_value|floatformat:2|intcomma }}€</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-dark text-white">
+            <div class="card-header">
+                <h5 class="mb-0">+/- Values</h5>
+            </div>
+            <div class="card-body">
+                <h3 class="mb-0">{{ pnl|floatformat:2|intcomma }}€</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-dark text-white">
+            <div class="card-header">
+                <h5 class="mb-0">Last Updated</h5>
+            </div>
+            <div class="card-body">
+                <h3 class="mb-0">{{ latest_date }}</h3>
+            </div>
+        </div>
+    </div>
+</div>

@@ -12,7 +12,7 @@ from plotly.utils import PlotlyJSONEncoder
 
 from quotes.models import Portfolio, FinancialData, Order, FinancialObject
 from quotes.utils.chart_creation import create_portfolio_chart, get_portfolio_performance
-from quotes.utils.chart_portfolio_util import performance_overview, get_order_history, create_allocation_chart
+from quotes.utils.chart_portfolio_util import performance_overview, get_order_history, create_allocation_chart, create_portfolio_performance_chart
 
 
 
@@ -105,6 +105,10 @@ def portfolio(request, pk):
 	allocation_chart = create_allocation_chart(pk)
 	allocation_json = json.dumps(allocation_chart, cls=PlotlyJSONEncoder)
 
+	# Performance chart
+	performance_chart = create_portfolio_performance_chart(pk)
+	performance_json = json.dumps(performance_chart, cls=PlotlyJSONEncoder)
+
 	# inventory table
 	inv_df = performance_overview(pk)
 	
@@ -118,6 +122,7 @@ def portfolio(request, pk):
 		'pnl': pnl,
 		'latest_date': latest_date,
 		'allocation_chart': allocation_json,
+		'performance_chart': performance_json,
 		'inventory': inv_df,
 		'orders': orders,
 		'financial_objects': financial_objects,
@@ -141,7 +146,7 @@ def delete_order(request, order_id):
 	orders = get_order_history(portfolio_id)
 
 	# Only return the updated table HTML
-	return render(request, "partials/orders_table.html", {'orders': orders, 'pk': portfolio_id, 'financial_objects': financial_objects})
+	return render(request, "partials/portfolio/row4_orders_tab.html", {'orders': orders, 'pk': portfolio_id, 'financial_objects': financial_objects})
 
 def add_order(request, pk):
     """
