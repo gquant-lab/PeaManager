@@ -1,7 +1,10 @@
 import numpy as np
 import plotly.graph_objects as go
+from datetime import datetime
+from typing import Optional
 
 from quotes.models import Portfolio, FinancialData, Order
+from quotes.utils.chart_creation import timeframe_to_limit_date
 
 def performance_overview(id_portfolio):
     """
@@ -91,7 +94,7 @@ def create_allocation_chart(portfolio_id):
     
     return fig
 
-def create_portfolio_performance_chart(portfolio_id, time_frame='max'):
+def create_portfolio_performance_chart(portfolio_id, time_frame='max', start_date: Optional[str]=None, end_date: Optional[str]=None):
     """
     Create a time series chart showing portfolio performance over time.
     Single portfolio version - no legend needed.
@@ -99,12 +102,12 @@ def create_portfolio_performance_chart(portfolio_id, time_frame='max'):
     Args:
         portfolio_id: Portfolio primary key
         time_frame: '1m', '3m', '6m', 'ytd', '1y', '3y', 'max'
+        start_date: Optional custom start date (YYYY-MM-DD string)
+        end_date: Optional custom end date (YYYY-MM-DD string)
     
     Returns:
         Plotly Figure
     """
-    from quotes.utils.chart_creation import timeframe_to_limit_date
-    
     ptf = Portfolio.objects.get(id=portfolio_id)
     
     # Ensure time series is loaded
@@ -112,8 +115,13 @@ def create_portfolio_performance_chart(portfolio_id, time_frame='max'):
         ptf.get_TS()
     
     # Filter by timeframe
-    limit_date = timeframe_to_limit_date(time_frame)
-    ts = ptf.ts_cumul_ret[ptf.ts_cumul_ret.index >= limit_date]
+    if start_date and end_date:
+        start = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        ts = ptf.ts_cumul_ret[(ptf.ts_cumul_ret.index >= start) & (ptf.ts_cumul_ret.index <= end)]
+    else:
+        limit_date = timeframe_to_limit_date(time_frame)
+        ts = ptf.ts_cumul_ret[ptf.ts_cumul_ret.index >= limit_date]
     
     # Normalize to start at 0% for returns view
     ts_normalized = (ts / ts.iloc[0]) - 1
@@ -149,7 +157,12 @@ def create_portfolio_performance_chart(portfolio_id, time_frame='max'):
         plot_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
         margin=dict(t=20, b=40, l=40, r=60),
-        hovermode='x unified'
+        hovermode='x',
+        hoverlabel=dict(
+            font_color='white',
+            font_size=14,
+
+        )
     )
     
     return fig

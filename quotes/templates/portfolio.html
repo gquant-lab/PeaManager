@@ -36,6 +36,74 @@
     var performanceData = {{ performance_chart|safe }};
     Plotly.newPlot('performance-chart', performanceData.data, performanceData.layout, {responsive: true});
 
+    // Timeframe button functionality
+    document.querySelectorAll('[data-timeframe]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const timeframe = this.getAttribute('data-timeframe');
+
+            // Handle Custom button specially
+            if (timeframe === 'custom') {
+                const modal = new bootstrap.Modal(document.getElementById('customDateModal'));
+                modal.show();
+                return;  // Don't fetch data yet
+            }
+
+                // Handle Year button
+            if (timeframe === 'year') {
+                const modal = new bootstrap.Modal(document.getElementById('yearModal'));
+                modal.show();
+                return;
+            }
+
+            const pk = this.closest('.btn-group').getAttribute('data-portfolio-id');
+            
+            fetch(`/portfolio/${pk}/chart/?timeframe=${timeframe}`)
+                .then(response => response.json())
+                .then(data => {
+                    Plotly.react('performance-chart', data.data, data.layout);
+                });
+        });
+    });
+
+    // Custom date range Apply button
+    document.getElementById('apply-custom-dates').addEventListener('click', function() {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        
+        if (!startDate || !endDate) {
+            alert('Please select both start and end dates');
+            return;
+        }
+        
+        const pk = document.querySelector('[data-portfolio-id]').getAttribute('data-portfolio-id');
+        
+        fetch(`/portfolio/${pk}/chart/?start_date=${startDate}&end_date=${endDate}`)
+            .then(response => response.json())
+            .then(data => {
+                Plotly.react('performance-chart', data.data, data.layout);
+                bootstrap.Modal.getInstance(document.getElementById('customDateModal')).hide();
+            });
+    });
+
+    // Year Apply button
+    document.getElementById('apply-year').addEventListener('click', function() {
+        const year = document.getElementById('year-input').value;
+        
+        if (!year) {
+            alert('Please enter a year');
+            return;
+        }
+        
+        const pk = document.querySelector('[data-portfolio-id]').getAttribute('data-portfolio-id');
+        
+        fetch(`/portfolio/${pk}/chart/?year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                Plotly.react('performance-chart', data.data, data.layout);
+                bootstrap.Modal.getInstance(document.getElementById('yearModal')).hide();
+            });
+    });
+
     // HTMX + Bootstrap Modal Fix
     // HTMX doesn't auto-close Bootstrap modals after form submission.
     // Listen for afterSwap event, close modal, and clean up backdrop/body styles.

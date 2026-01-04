@@ -3,6 +3,8 @@ import plotly.graph_objects as go
 import pandas as pd
 
 from quotes.models import Portfolio
+from quotes.utils.date_helpers import prev_business_day, get_first_business_day_of_month
+
 
 user_colors = {
     "Guillaume": "darkorange",
@@ -20,9 +22,34 @@ def timeframe_to_limit_date(time_frame: str) -> date:
             nb_months = time_frame[0]
             start_datetime = datetime.today() - pd.tseries.offsets.DateOffset(months=int(nb_months))
             return start_datetime.date()
+        
+        case "mtd":
+            current_year = datetime.today().year
+            current_month = datetime.today().month
+            return get_first_business_day_of_month(current_year, current_month)
+        
+        case "lme":
+            current_year = datetime.today().year
+            current_month = datetime.today().month
+            first_day_month = get_first_business_day_of_month(current_year, current_month)            
+            return prev_business_day(first_day_month) 
+
+        case "qtd":
+            current_month = datetime.today().month
+            quarter_start_month = ((current_month - 1) // 3) * 3 + 1
+            return get_first_business_day_of_month(datetime.today().year, quarter_start_month)
+        
+        case "htd":
+            current_month = datetime.today().month
+            half_start_month = 1 if current_month <= 6 else 7
+            return get_first_business_day_of_month(datetime.today().year, half_start_month)
 
         case "ytd":
-            return datetime(datetime.today().year, 1, 1).date()
+            current_year = datetime.today().year
+            if prev_business_day(date.today()).year < current_year:
+                return get_first_business_day_of_month(current_year - 1, 1)
+            else: 
+                return get_first_business_day_of_month(current_year, 1)
 
         case "1y" | "3y":
             nb_years = time_frame[0]
