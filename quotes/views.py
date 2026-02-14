@@ -14,7 +14,7 @@ from quotes.models import Portfolio, FinancialData, Order, FinancialObject
 from quotes.utils.chart_creation import create_portfolio_chart, get_portfolio_performance
 from quotes.utils.chart_portfolio_util import performance_overview, get_order_history, create_allocation_chart, create_portfolio_performance_chart
 from quotes.utils.date_helpers import prev_business_day, get_first_business_day_of_month
-
+from .forms import OrderForm
 
 
 def home(request):
@@ -106,6 +106,8 @@ def portfolio(request, pk):
     orders = get_order_history(pk)
     financial_objects = FinancialObject.objects.all()
 
+    form = OrderForm()
+
     # Send back a string to dash template in the context
     context = {
         'ptf_value': ptf_value,
@@ -117,6 +119,7 @@ def portfolio(request, pk):
         'orders': orders,
         'financial_objects': financial_objects,
         'pk': pk,
+        'form': form,
     }
     return render(request, "portfolio.html", context)
 
@@ -169,33 +172,25 @@ def add_order(request, pk):
     Add a new order and return the updated orders table.
     """
     if request.method == 'POST':
-        # Get the portfolio
-        portfolio = Portfolio.objects.get(id=pk)
-        
-        # Get the financial object
-        financial_object = FinancialObject.objects.get(id=request.POST['id_object'])
-        
-        # Create the new order
-        Order.objects.create(
-            portfolio=portfolio,
-            id_object=financial_object,
-            date=request.POST['date'],
-            direction=request.POST['direction'],
-            nb_items=request.POST['nb_items'],
-            price=request.POST['price'],
-            total_fee=request.POST.get('total_fee', 0),
-        )
-        
-        # Get updated order list
-        orders = get_order_history(pk)
-        financial_objects = FinancialObject.objects.all()
-        
-        # Return the updated table HTML
-        return render(request, 'partials/orders_table.html', {
-            'orders': orders,
-            'pk': pk,
-            'financial_objects': financial_objects
-        })
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.portfolio_id = pk
+            order.save()
+            # Get updated order list and render template
+            orders = get_order_history(pk)
+            financial_objects = FinancialObject.objects.all()
+            return render(request, 'partials/portfolio/row4_orders_tab.html', {
+                'orders': orders,
+                'pk': pk,
+                'financial_objects': financial_objects
+            })
+        else:
+            return render(request, 'template.html', {
+                'form': form,
+                'orders': orders,
+                'pk': pk,
+            })
 
 
 def instrument_comparison(request):

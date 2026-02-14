@@ -49,52 +49,13 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    {% load bootstrap5 %}
                     <form id="addOrderForm" hx-post="{% url 'add_order' pk %}" 
-                          hx-target="#orders-table" 
-                          hx-swap="outerHTML">
+                        hx-target="#orders-table" 
+                        hx-swap="outerHTML">
                         {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label for="id_object" class="form-label">Financial Object</label>
-                            <select class="form-select bg-dark text-white" name="id_object" id="id_object" required>
-                                <option value="">Select an instrument...</option>
-                                {% for obj in financial_objects %}
-                                <option value="{{ obj.id }}">{{ obj.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="date" class="form-control bg-dark text-white" name="date" id="date" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="direction" class="form-label">Direction</label>
-                            <select class="form-select bg-dark text-white" name="direction" id="direction" required>
-                                <option value="">Select...</option>
-                                <option value="BUY">Buy</option>
-                                <option value="SELL">Sell</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="nb_items" class="form-label">Number of Items</label>
-                            <input type="number" step="0.01" class="form-control bg-dark text-white" name="nb_items" id="nb_items" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="number" step="0.001" class="form-control bg-dark text-white" name="price" id="price" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="total_fee" class="form-label">Total Fee</label>
-                            <input type="number" step="0.001" class="form-control bg-dark text-white" name="total_fee" id="total_fee" value="0">
-                        </div>
-
+                        {% bootstrap_form form %}
                         <button type="submit" class="btn btn-primary">Add Order</button>
-                        
                     </form>
                 </div>
             </div>
