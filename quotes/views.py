@@ -99,10 +99,7 @@ def portfolio(request, pk):
     inv_df = performance_overview(pk)
     
     # order history
-    orders = get_order_history(pk)
     financial_objects = FinancialObject.objects.all()
-
-    form = OrderForm()
 
     # Send back a string to dash template in the context
     context = {
@@ -112,10 +109,8 @@ def portfolio(request, pk):
         'allocation_chart': allocation_json,
         'performance_chart': performance_json,
         'inventory': inv_df,
-        'orders': orders,
         'financial_objects': financial_objects,
         'pk': pk,
-        'form': form,
     }
     return render(request, "portfolio.html", context)
 
