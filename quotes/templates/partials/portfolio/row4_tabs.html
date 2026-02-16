@@ -8,11 +8,6 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders" type="button" role="tab" aria-controls="orders" aria-selected="false">
-                    Order History
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="attribution-tab" data-bs-toggle="tab" data-bs-target="#attribution" type="button" role="tab" aria-controls="attribution" aria-selected="false">
                     Performance Attribution
                 </button>
@@ -33,9 +28,6 @@
         <div class="tab-content" id="portfolioTabContent">
             <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                 {% include 'partials/portfolio/row4_overview_tab.html' %}
-            </div>
-            <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                {% include 'partials/portfolio/row4_orders_tab.html' %}
             </div>
         </div>
     </div>

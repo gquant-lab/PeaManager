@@ -1,0 +1,10 @@
+{% load django_bootstrap5 %}
+<form hx-post="{% if order_id %}{% url 'edit_order' order_id %}{% else %}{% url 'add_order' pk %}{% endif %}" 
+      hx-target="#orders-table" 
+      hx-swap="outerHTML">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">
+        {% if order_id %}Update Order{% else %}Add Order{% endif %}
+    </button>
+</form>

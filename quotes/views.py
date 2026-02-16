@@ -1,14 +1,10 @@
-from flask import request
-from plotly.graph_objs import YAxis
-import datetime as dt
 from django.shortcuts import render
 from django.db.models import Q
 from django.http import JsonResponse
-import plotly.express as px
-import plotly.graph_objects as go
-import pandas as pd
 import json
 from plotly.utils import PlotlyJSONEncoder
+
+from django.core.paginator import Paginator
 
 from quotes.models import Portfolio, FinancialData, Order, FinancialObject
 from quotes.utils.chart_creation import create_portfolio_chart, get_portfolio_performance
@@ -123,6 +119,32 @@ def portfolio(request, pk):
     }
     return render(request, "portfolio.html", context)
 
+def portfolio_orders(request, pk):
+    """
+    Display orders for a portfolio with pagination.
+    """
+    portfolio = Portfolio.objects.get(id=pk)
+    
+    # Get paginated orders
+    orders = get_order_history(pk)
+    paginator = Paginator(orders, 25)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    # Empty form for adding orders
+    form = OrderForm()
+    financial_objects = FinancialObject.objects.all()
+    
+    context = {
+        'portfolio': portfolio,
+        'page_obj': page_obj,
+        'form': form,
+        'financial_objects': financial_objects,
+        'pk': pk,
+    }
+    
+    return render(request, 'orders.html', context)
+
 
 def portfolio_chart_data(request, pk):
     """
@@ -200,3 +222,48 @@ def instrument_comparison(request):
 
 def databases(request):
     return render(request, "databases.html", {})
+
+def order_form(request, pk):
+    """
+    Return the order form for adding or editing an order.
+    If 'order_id' is provided in GET params, load that order for editing.
+    """
+    order_id = request.GET.get('order_id')
+    financial_objects = FinancialObject.objects.all()
+
+    if order_id:
+        # Edit existing order
+        order = Order.objects.get(id=order_id)
+        form = OrderForm(instance=order)
+    else:
+        form = OrderForm()
+
+    return render(request, 'partials/portfolio/order_form.html', {
+        'form': form,
+        'pk': pk,
+        'financial_objects': financial_objects
+    })
+
+def edit_order(request, order_id):
+    """
+    Handle POST request to edit an existing order.
+    """
+    order = Order.objects.get(id=order_id)
+    
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            
+            # Get paginated orders
+            portfolio_id = order.portfolio.id
+            orders = get_order_history(portfolio_id)
+            paginator = Paginator(orders, 25)
+            page_obj = paginator.get_page(request.GET.get('page', 1))
+
+            # Get updated order list and render template
+            return render(request, 'partials/portfolio/orders_table.html', {
+                'orders': page_obj,
+                'form': OrderForm(),
+                'pk': portfolio_id,
+            })

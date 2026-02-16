@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     
     'quotes.apps.QuotesConfig',
     
-    'bootstrap5',
+    'django_bootstrap5',
 ]
 
 MIDDLEWARE = [
