@@ -1,5 +1,32 @@
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1a3a52;">
-  <div class="container-fluid">
+<style>
+  .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #4facfe !important;
+    letter-spacing: 0.5px;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 1rem !important;
+    margin: 0 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-link:hover:not(.disabled) {
+    background-color: rgba(79, 172, 254, 0.1);
+    color: #4facfe !important;
+  }
+  
+  .nav-link.active {
+    background-color: rgba(79, 172, 254, 0.2);
+    color: #4facfe !important;
+    font-weight: 500;
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1a3a52; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+  <div class="container-fluid" style="padding-left: 13rem; padding-right: 13rem;">
     <a class="navbar-brand" href="{% url 'home' %}">PEA Manager</a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -10,10 +37,10 @@
       <ul class="navbar-nav me-auto">
         {% if pk %}
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'portfolio' pk %}">Dashboard</a>
+          <a class="nav-link {% if request.resolver_match.url_name == 'portfolio' %}active{% endif %}" href="{% url 'portfolio' pk %}">Dashboard</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'portfolio_orders' pk %}">Orders</a>
+          <a class="nav-link {% if request.resolver_match.url_name == 'portfolio_orders' %}active{% endif %}" href="{% url 'portfolio_orders' pk %}">Orders</a>
         </li>
         <li class="nav-item">
           <a class="nav-link disabled" href="#">Performance</a>
@@ -26,7 +53,7 @@
 
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'instrument_comparison' %}">Instruments</a>
+          <a class="nav-link {% if request.resolver_match.url_name == 'instrument_comparison' %}active{% endif %}" href="{% url 'instrument_comparison' %}">Instruments</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">Settings</a>

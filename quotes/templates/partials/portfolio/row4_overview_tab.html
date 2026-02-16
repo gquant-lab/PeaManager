@@ -4,25 +4,27 @@
 <div class="table-responsive">
     <table class="table table-dark table-hover text-center">
         <thead>
-            <tr>
-                <th>Instrument</th>
-                <th>Number</th>
-                <th>PRU</th>
-                <th>Amount Paid</th>
-                <th>Current Value</th>
-                <th>+/- Value</th>
-                <th>Weight</th>
+            <tr style="--bs-table-bg: #343a40; border-bottom: 3px solid #495057;">
+                <th class="text-white py-2">Instrument</th>
+                <th class="text-white py-2">Number</th>
+                <th class="text-white py-2">PRU</th>
+                <th class="text-white py-2">Amount Paid</th>
+                <th class="text-white py-2">Current Value</th>
+                <th class="text-white py-2">+/- Value</th>
+                <th class="text-white py-2">YTD Total Return</th>
+                <th class="text-white py-2">Weight</th>
             </tr>
         </thead>
         <tbody>
             {% for item in inventory %}
             <tr>
-                <td>{{ item.Name }}</td>
+                <td class="fw-bold">{{ item.Name }}</td>
                 <td>{{ item.Number }}</td>
                 <td>{{ item.PRU }}</td>
                 <td>{{ item.Amount_Paid }}</td>
-                <td>{{ item.Current_Value }}</td>
-                <td>{{ item.Pnl }}</td>
+                <td style="color: #4facfe; font-weight: 600;">{{ item.Current_Value }}</td>
+                <td style="color: {% if item.Pnl|floatformat:0|add:0 >= 0 %}#43e97b{% else %}#fa709a{% endif %}; font-weight: 600;">{{ item.Pnl }}</td>
+                <td style="color: #a770ef; font-weight: 600;">2.5%</td>
                 <td>{{ item.Weight }}</td>
             </tr>
             {% endfor %}

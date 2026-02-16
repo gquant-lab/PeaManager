@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-4" style="padding-left: 13rem; padding-right: 13rem;">
     <!-- Page Header -->
     <h1 class="text-white">Portfolio Characteristics</h1>
     <hr class="my-2 text-white">
@@ -11,14 +11,31 @@
     <!-- Row 1: Summary Cards (Portfolio Value | PnL | Last Updated) -->
     {% include 'partials/portfolio/row1_summary_cards.html' %}
 
-    <!-- Row 2: Analysis Charts -->
+    <!-- Row 2: Performance Chart (Full Width) -->
     {% include 'partials/portfolio/row2_analysis_charts.html' %}
 
-    <!-- Row 3: Performance Chart -->
-    {% include 'partials/portfolio/row3_performance_chart.html' %}
-
-    <!-- Row 4: Detailed Tabs -->
-    {% include 'partials/portfolio/row4_tabs.html' %}
+    <!-- Row 3: Table (75%) + Geographic Exposure (25%) -->
+    <div class="row mt-4">
+        <div class="col-md-9">
+            <div class="card bg-dark text-white">
+                <div class="card-body p-0">
+                    {% include 'partials/portfolio/row4_overview_tab.html' %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Geographic Exposure</h5>
+                </div>
+                <div class="card-body" style="padding: 0.5rem;">
+                    <div id="geography-chart" style="height: 135px;">
+                        <p class="text-muted text-center py-4">France / Europe / USA / World - Coming Soon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
@@ -29,8 +46,8 @@
 
 <script>
     // Portfolio Allocation Pie Chart
-    var allocationData = {{ allocation_chart|safe }};
-    Plotly.newPlot('allocation-chart', allocationData.data, allocationData.layout, {responsive: true});
+    // var allocationData = {{ allocation_chart|safe }};
+    // Plotly.newPlot('allocation-chart', allocationData.data, allocationData.layout, {responsive: true});
 
     // Portfolio Performance Time Series Chart
     var performanceData = {{ performance_chart|safe }};

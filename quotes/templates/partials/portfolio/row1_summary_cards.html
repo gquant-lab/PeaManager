@@ -1,36 +1,48 @@
 {% load humanize %}
 
-<!-- Row 1: Summary Cards (Portfolio Value | PnL | Last Updated) -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card bg-dark text-white">
-            <div class="card-header">
-                <h5 class="mb-0">Current Portfolio Value</h5>
-            </div>
-            <div class="card-body">
+<!-- Row 1: Summary Cards (Portfolio Value | PnL | Dividends | Price Return | Total Return | Last Updated) -->
+<div class="row mb-5 g-3">
+    <div class="col">
+        <div class="card bg-dark text-white h-100" style="border: 2px solid #4facfe;">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h5 class="mb-2" style="font-variant: small-caps; letter-spacing: 0.05em;">Portfolio Value</h5>
                 <h3 class="mb-0">{{ ptf_value|floatformat:2|intcomma }}€</h3>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4">
-        <div class="card bg-dark text-white">
-            <div class="card-header">
-                <h5 class="mb-0">+/- Values</h5>
-            </div>
-            <div class="card-body">
+    <div class="col">
+        <div class="card bg-dark text-white h-100" style="border: 2px solid {% if pnl|floatformat:0|add:0 >= 0 %}#43e97b{% else %}#fa709a{% endif %};">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h5 class="mb-2" style="font-variant: small-caps; letter-spacing: 0.05em;">+/- Values</h5>
                 <h3 class="mb-0">{{ pnl|floatformat:2|intcomma }}€</h3>
             </div>
         </div>
     </div>
     
-    <div class="col-md-4">
-        <div class="card bg-dark text-white">
-            <div class="card-header">
-                <h5 class="mb-0">Last Updated</h5>
+    <div class="col">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h5 class="mb-2" style="font-variant: small-caps; letter-spacing: 0.05em;">Total Dividends</h5>
+                <h3 class="mb-0">1,234.56€</h3>
             </div>
-            <div class="card-body">
-                <h3 class="mb-0">{{ latest_date }}</h3>
+        </div>
+    </div>
+    
+    <div class="col">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h5 class="mb-2" style="font-variant: small-caps; letter-spacing: 0.05em;">YTD Price Return</h5>
+                <h3 class="mb-0" style="color: #43e97b;">+6.5%</h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col">
+        <div class="card bg-dark text-white h-100">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center text-center">
+                <h5 class="mb-2" style="font-variant: small-caps; letter-spacing: 0.05em;">YTD Total Return</h5>
+                <h3 class="mb-0" style="color: #43e97b;">+8.2%</h3>
             </div>
         </div>
     </div>
