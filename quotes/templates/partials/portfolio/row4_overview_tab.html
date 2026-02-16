@@ -23,7 +23,7 @@
                 <td>{{ item.PRU }}</td>
                 <td>{{ item.Amount_Paid }}</td>
                 <td style="color: #4facfe; font-weight: 600;">{{ item.Current_Value }}</td>
-                <td style="color: {% if item.Pnl|floatformat:0|add:0 >= 0 %}#43e97b{% else %}#fa709a{% endif %}; font-weight: 600;">{{ item.Pnl }}</td>
+                <td style="color: {% if item.Pnl.0 != '-' %}#43e97b{% else %}#fa709a{% endif %}; font-weight: 600;">{{ item.Pnl }}</td>
                 <td style="color: #a770ef; font-weight: 600;">2.5%</td>
                 <td>{{ item.Weight }}</td>
             </tr>
