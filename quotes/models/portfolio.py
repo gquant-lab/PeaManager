@@ -205,6 +205,8 @@ class Portfolio(models.Model):
         Returns the time series of the portfolio since its inception
         """
         from .yahoo_finance import YahooFinanceQuery
+        from django.core.cache import cache
+        from .financial_data import FinancialData        
         
         # Retrieve all orders
         all_order_dates = set([order.date for order in self.orders.all()])
@@ -212,9 +214,18 @@ class Portfolio(models.Model):
 
         if len(all_order_dates) == 0:
             raise Exception("No order data.")
+        
+        latest_order_date = all_order_dates[-1]
+        latest_price_date = FinancialData.get_price_most_recent_date()
 
         # Add today so that the time series is computed until today
         all_order_dates.append(datetime.today().date())
+
+        cache_key = f"portfolio_{self.id}_{latest_order_date}_{latest_price_date}"
+        cached = cache.get(cache_key)
+        if cached:
+            self.ts_ret, self.ts_val, self.ts_cumul_ret = cached
+            return
 
         ts = []
         ts_ret = []
@@ -270,6 +281,7 @@ class Portfolio(models.Model):
             ])
         self.ts_cumul_ret.sort_index(inplace=True)
         self.ts_cumul_ret = self.ts_cumul_ret.cumprod()
+        cache.set(cache_key, (self.ts_ret, self.ts_val, self.ts_cumul_ret))
 
     def get_individual_returns(self, start_date: str, end_date: str) -> pd.DataFrame:
         """

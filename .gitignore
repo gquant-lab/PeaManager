@@ -22,6 +22,9 @@ TODO.md
 .pytest_cache/
 pytest.ini
 
+# Django file-based cache
+.cache/
+
 ### VisualStudioCode ###
 .vscode/
 
