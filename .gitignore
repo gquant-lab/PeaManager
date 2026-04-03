@@ -10,6 +10,8 @@ media
 
 # Perso
 TODO.md
+.venv/
+.vscode/
 
 # Environment variables
 .env

@@ -72,8 +72,8 @@ class FinancialObject(models.Model):
             ))
 
         if price_data:
-            FinancialData.objects.bulk_create(price_data)
-            logger.info(f"Saved {len(price_data)} price records for {self.ticker}")
+            created = FinancialData.objects.bulk_create(price_data, ignore_conflicts=True)
+            logger.info(f"Saved {len(created)} new price records for {self.ticker} (skipped duplicates)")
 
         # Save dividends to database
         div_data = []
@@ -89,8 +89,8 @@ class FinancialObject(models.Model):
             )
         
         if div_data:
-            FinancialData.objects.bulk_create(div_data)
-            logger.info(f"Saved {len(div_data)} dividends for {self.ticker}")
+            created = FinancialData.objects.bulk_create(div_data, ignore_conflicts=True)
+            logger.info(f"Saved {len(created)} new dividend records for {self.ticker} (skipped duplicates)")
 
 
     def get_perf(self, start_date, end_date=datetime.today().date()):

@@ -20,6 +20,7 @@ class FinancialData(models.Model):
 
     class Meta:
         ordering = ["-date"]
+        unique_together = [('id_object', 'date', 'field')]
 
     id_object = models.ForeignKey(FinancialObject, on_delete=models.CASCADE)
     date = models.DateField()
