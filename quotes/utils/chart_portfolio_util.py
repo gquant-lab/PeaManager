@@ -18,7 +18,10 @@ def performance_overview(id_portfolio):
 
     prices_map = dict(
         FinancialData.objects
-        .filter(id_object__in=df["Id"].tolist(), field="NAV", origin="Yahoo Finance", date=latest_date)
+        .filter(id_object__in=df["Id"].tolist(), 
+                field="NAV", 
+                origin="Yahoo Finance", 
+                date=latest_date)
         .values_list("id_object_id", "value")
     )
     prices = [prices_map.get(id) for id in df["Id"].tolist()]

@@ -141,15 +141,6 @@ class Portfolio(models.Model):
     def __str__(self):
         return f"{self.owner} - {self.name}"
 
-    @property
-    def orders(self) -> models.QuerySet["Order"]:
-        """
-        Queries the order database and returns all orders associated to Portfolio in date ascending order
-        """
-        if not TYPE_CHECKING:
-            from .order import Order
-        return Order.objects.filter(portfolio=self.id).order_by("date")
-
     def inventory_df(self) -> pd.DataFrame:
           """
           Get current inventory in a dataframe, ordered by descending rows of weight

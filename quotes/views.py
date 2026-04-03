@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 import json
 from plotly.utils import PlotlyJSONEncoder
 
@@ -73,7 +73,7 @@ def portfolio(request, pk):
     """
     import numpy as np
     
-    ptf = Portfolio.objects.get(id=pk)
+    ptf = get_object_or_404(Portfolio, id=pk)
     latest_date = FinancialData.get_price_most_recent_date()
 
     inventory = ptf.get_inventory(latest_date)
@@ -114,7 +114,7 @@ def portfolio_orders(request, pk):
     """
     Display orders for a portfolio with pagination.
     """
-    portfolio = Portfolio.objects.get(id=pk)
+    portfolio = get_object_or_404(Portfolio, id=pk)
     
     # Get paginated orders
     orders = get_order_history(pk)
@@ -167,7 +167,9 @@ def delete_order(request, order_id):
     """
     Delete an order and return the updated orders table.
     """
-    order = Order.objects.get(id=order_id)
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    order = get_object_or_404(Order, id=order_id)
     portfolio_id = order.portfolio.id
     financial_objects = FinancialObject.objects.all()
 
@@ -223,7 +225,7 @@ def order_form(request, pk):
 
     if order_id:
         # Edit existing order
-        order = Order.objects.get(id=order_id)
+        order = get_object_or_404(Order, id=order_id)
         form = OrderForm(instance=order)
     else:
         form = OrderForm()
@@ -238,7 +240,7 @@ def edit_order(request, order_id):
     """
     Handle POST request to edit an existing order.
     """
-    order = Order.objects.get(id=order_id)
+    order = get_object_or_404(Order, id=order_id)
     
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)

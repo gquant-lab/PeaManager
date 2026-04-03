@@ -13,6 +13,9 @@ class Order(models.Model):
         BUY = "BUY"
         SELL = "SELL"
 
+    class Meta:
+        ordering = ["date"]
+
     date = models.DateField()
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name="orders")
     id_object = models.ForeignKey(FinancialObject, on_delete=models.CASCADE)
