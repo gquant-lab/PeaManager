@@ -21,6 +21,9 @@ class FinancialData(models.Model):
     class Meta:
         ordering = ["-date"]
         unique_together = [('id_object', 'date', 'field')]
+        indexes = [
+            models.Index(fields=['id_object', 'date', 'field'], name='findata_obj_date_field_idx'),
+        ]
 
     id_object = models.ForeignKey(FinancialObject, on_delete=models.CASCADE)
     date = models.DateField()

@@ -16,12 +16,12 @@ def performance_overview(id_portfolio):
     df = ptf.inventory_df()
     df["Amount_Paid"] = df["PRU"] * df["Number"]
 
-    prices = [
+    prices_map = dict(
         FinancialData.objects
-        .filter(id_object=id, field="NAV", origin="Yahoo Finance", date=latest_date)
-        .values_list("value", flat=True).first() 
-        for id in df["Id"].tolist()
-    ]
+        .filter(id_object__in=df["Id"].tolist(), field="NAV", origin="Yahoo Finance", date=latest_date)
+        .values_list("id_object_id", "value")
+    )
+    prices = [prices_map.get(id) for id in df["Id"].tolist()]
     
     df["Current_Value"] = np.multiply(df["Number"], np.array(prices))
     df.sort_values(by="Current_Value", ascending=False, inplace=True)
