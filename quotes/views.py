@@ -178,7 +178,7 @@ def delete_order(request, order_id):
     orders = get_order_history(portfolio_id)
 
     # Only return the updated table HTML
-    return render(request, "partials/portfolio/row4_orders_tab.html", {'orders': orders, 'pk': portfolio_id, 'financial_objects': financial_objects})
+    return render(request, "partials/portfolio/orders_table.html", {'orders': orders, 'pk': portfolio_id, 'financial_objects': financial_objects})
 
 def add_order(request, pk):
     """
@@ -193,15 +193,14 @@ def add_order(request, pk):
             # Get updated order list and render template
             orders = get_order_history(pk)
             financial_objects = FinancialObject.objects.all()
-            return render(request, 'partials/portfolio/row4_orders_tab.html', {
+            return render(request, 'partials/portfolio/orders_table.html', {
                 'orders': orders,
                 'pk': pk,
                 'financial_objects': financial_objects
             })
         else:
-            return render(request, 'template.html', {
+            return render(request, 'partials/portfolio/order_form.html', {
                 'form': form,
-                'orders': orders,
                 'pk': pk,
             })
 

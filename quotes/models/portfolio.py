@@ -271,9 +271,6 @@ class Portfolio(models.Model):
         self.ts_cumul_ret.sort_index(inplace=True)
         self.ts_cumul_ret = self.ts_cumul_ret.cumprod()
 
-        self.ts_val.to_excel("TS_val.xlsx")
-        self.ts_ret.to_excel("TS_ret.xlsx")
-
     def get_individual_returns(self, start_date: str, end_date: str) -> pd.DataFrame:
         """
         Lines: All Financial Instruments that have been in the portfolio during the time frame

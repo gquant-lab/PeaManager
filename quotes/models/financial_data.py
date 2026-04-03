@@ -36,4 +36,5 @@ class FinancialData(models.Model):
         """
         Get the second most recent date from price dates, in case all values were not updated to the most recent one
         """
-        return sorted(FinancialData.objects.values_list("date", flat=True).distinct(), reverse=True)[1]
+        dates = sorted(FinancialData.objects.values_list("date", flat=True).distinct(), reverse=True)
+        return dates[1] if len(dates) > 1 else dates[0]
