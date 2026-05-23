@@ -206,13 +206,12 @@ class Portfolio(models.Model):
         if len(all_order_dates) == 0:
             raise Exception("No order data.")
         
-        latest_order_date = all_order_dates[-1]
         latest_price_date = FinancialData.get_price_most_recent_date()
 
         # Add today so that the time series is computed until today
         all_order_dates.append(datetime.today().date())
 
-        cache_key = f"portfolio_{self.id}_{latest_order_date}_{latest_price_date}"
+        cache_key = f"portfolio_{self.id}_ts"
         cached = cache.get(cache_key)
         if cached:
             self.ts_ret, self.ts_val, self.ts_cumul_ret = cached
@@ -273,6 +272,25 @@ class Portfolio(models.Model):
         self.ts_cumul_ret.sort_index(inplace=True)
         self.ts_cumul_ret = self.ts_cumul_ret.cumprod()
         cache.set(cache_key, (self.ts_ret, self.ts_val, self.ts_cumul_ret))
+
+    def get_ytd_price_return(self) -> float | None:
+        """
+        Returns the YTD price return of the portfolio as a float (e.g. 0.065 for +6.5%).
+        """
+        from quotes.utils.chart_creation import timeframe_to_limit_date
+
+        if self.ts_cumul_ret is None:
+            self.get_TS()
+
+        ytd_start = pd.Timestamp(timeframe_to_limit_date("ytd"))
+        series = self.ts_cumul_ret.copy()
+        series.index = pd.DatetimeIndex(series.index)
+
+        start_candidates = series[series.index >= ytd_start]
+        if start_candidates.empty:
+            return None
+
+        return float(series.iloc[-1] / start_candidates.iloc[0] - 1)
 
     def get_individual_returns(self, start_date: str, end_date: str) -> pd.DataFrame:
         """

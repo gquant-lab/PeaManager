@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseNotAllowed
+from django.core.cache import cache
 import json
 from plotly.utils import PlotlyJSONEncoder
 
@@ -98,6 +99,16 @@ def portfolio(request, pk):
     # inventory table
     inv_df = performance_overview(pk)
 
+    # YTD Price Return
+    ytd_price_return = ptf.get_ytd_price_return()
+    if ytd_price_return is not None:
+        sign = "+" if ytd_price_return >= 0 else ""
+        ytd_price_return_str = f"{sign}{ytd_price_return:.1%}"
+        ytd_price_return_color = "#43e97b" if ytd_price_return >= 0 else "#fa709a"
+    else:
+        ytd_price_return_str = "-"
+        ytd_price_return_color = "#adb5bd"
+
     # Send back a string to dash template in the context
     context = {
         'ptf_value': ptf_value,
@@ -107,6 +118,8 @@ def portfolio(request, pk):
         'performance_chart': performance_json,
         'inventory': inv_df,
         'pk': pk,
+        'ytd_price_return': ytd_price_return_str,
+        'ytd_price_return_color': ytd_price_return_color,
     }
     return render(request, "portfolio.html", context)
 
@@ -175,12 +188,15 @@ def delete_order(request, order_id):
 
     # Delete the order
     order.delete()
+    cache.delete(f"portfolio_{portfolio_id}_ts")
 
     # Get updated order history
     orders = get_order_history(portfolio_id)
+    paginator = Paginator(orders, 25)
+    page_obj = paginator.get_page(1)
 
     # Only return the updated table HTML
-    return render(request, "partials/portfolio/orders_table.html", {'orders': orders, 'pk': portfolio_id, 'financial_objects': financial_objects})
+    return render(request, "partials/portfolio/orders_table.html", {'page_obj': page_obj, 'pk': portfolio_id, 'financial_objects': financial_objects})
 
 def add_order(request, pk):
     """
@@ -192,11 +208,14 @@ def add_order(request, pk):
             order = form.save(commit=False)
             order.portfolio_id = pk
             order.save()
+            cache.delete(f"portfolio_{pk}_ts")
             # Get updated order list and render template
             orders = get_order_history(pk)
             financial_objects = FinancialObject.objects.all()
+            paginator = Paginator(orders, 25)
+            page_obj = paginator.get_page(paginator.num_pages)
             return render(request, 'partials/portfolio/orders_table.html', {
-                'orders': orders,
+                'page_obj': page_obj,
                 'pk': pk,
                 'financial_objects': financial_objects
             })
@@ -246,9 +265,10 @@ def edit_order(request, order_id):
         form = OrderForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
+            portfolio_id = order.portfolio.id
+            cache.delete(f"portfolio_{portfolio_id}_ts")
             
             # Get paginated orders
-            portfolio_id = order.portfolio.id
             orders = get_order_history(portfolio_id)
             paginator = Paginator(orders, 25)
             page_obj = paginator.get_page(request.GET.get('page', 1))
