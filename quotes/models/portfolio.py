@@ -147,10 +147,12 @@ class Portfolio(models.Model):
           """
           return self.get_inventory().to_df()
 
-    def get_inventory(self, date=datetime.today()) -> PortfolioInventory:
+    def get_inventory(self, date=None) -> PortfolioInventory:
         """
         Given a date, return a list of Portfolio Entries with current inventory.
-        """        
+        """
+        if date is None:
+            date = datetime.today()
         all_orders = self.orders.filter(date__lte=date).order_by("date")
         
         curr_inventory: PortfolioInventory = []
