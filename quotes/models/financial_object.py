@@ -1,7 +1,7 @@
 """
 FinancialObject model - represents stocks, ETFs, indices, etc.
 """
-from typing import Iterable
+from typing import Iterable, Optional
 from django.db import models
 from datetime import date, datetime, time
 import logging
@@ -44,10 +44,6 @@ class FinancialObject(models.Model):
 
         manager = DataSourceManager()
         last_date = self.get_latest_available_nav()
-
-        # Handle special case for specific ISIN
-        if self.isin == "LU1834983477" and last_date:
-            last_date = date(2022,1,19)
 
         if last_date is None:
             logger.info(f"Fetching historical data for {self.ticker}")
@@ -93,16 +89,69 @@ class FinancialObject(models.Model):
             logger.info(f"Saved {len(created)} new dividend records for {self.ticker} (skipped duplicates)")
 
 
-    def get_perf(self, start_date, end_date=datetime.today().date()):
+    def get_price_return(self, start_date: date, end_date: date | None = None) -> float | None:
         """
-        Get Return between 2 dates
+        Get Price Return between 2 dates
         """
         from .financial_data import FinancialData
 
-        ini_nav = FinancialData.objects.filter(id_object=self, date=start_date, field="NAV", origin="Yahoo Finance").values_list("value", flat=True)
-        end_nav = FinancialData.objects.filter(id_object=self, date=end_date, field="NAV", origin="Yahoo Finance").values_list("value", flat=True)
-        
-        ini_nav = list(ini_nav)[0]
-        end_nav = list(end_nav)[0]
+        if end_date is None:
+            end_date = datetime.today().date()
 
+        ini_nav = FinancialData.objects.filter(
+            id_object=self, 
+            date__gte=start_date, 
+            field="NAV", 
+            origin="Yahoo Finance").order_by("date").values_list("value", flat=True).first()
+        
+        end_nav = FinancialData.objects.filter(
+            id_object=self, 
+            date__lte=end_date, 
+            field="NAV", 
+            origin="Yahoo Finance").order_by("-date").values_list("value", flat=True).first()
+
+        if ini_nav is None or end_nav is None:
+            return None
+        
         return end_nav / ini_nav -1
+    
+    def get_div_return(self, start_date: date, end_date: date | None = None) -> float | None:
+        """
+        Get Dividend Return between 2 dates
+        """
+        from .financial_data import FinancialData
+
+        if end_date is None:
+            end_date = datetime.today().date()
+
+        divs = FinancialData.objects.filter(
+            id_object=self, 
+            date__gte=start_date, 
+            date__lte=end_date, 
+            field="Dividends", 
+            origin="Yahoo Finance").values_list("value", flat=True)
+
+        total_divs = sum(divs)
+
+        ini_nav = FinancialData.objects.filter(
+            id_object=self, 
+            date__gte=start_date, 
+            field="NAV", 
+            origin="Yahoo Finance").order_by("date").values_list("value", flat=True).first()
+        
+        if ini_nav is None:
+            return None
+        
+        return total_divs / ini_nav
+    
+    def get_total_return(self, start_date: date, end_date: date | None = None) -> float | None:
+        """
+        Get Total Return between 2 dates
+        """
+        price_return = self.get_price_return(start_date, end_date)
+        div_return = self.get_div_return(start_date, end_date)
+
+        if price_return is None or div_return is None:
+            return None
+        
+        return price_return + div_return
